@@ -1,3 +1,4 @@
+import 'dart:developer' as developer;
 import 'dart:ffi';
 import 'dart:io';
 import 'package:ffi/ffi.dart';
@@ -5,6 +6,9 @@ import '../vtzero_dart_bindings_generated.dart';
 import 'vtz_exceptions.dart';
 
 const String _libName = 'vtzero_dart';
+
+/// Keep in sync with pubspec.yaml — used only for diagnostics.
+const String _packageVersion = '1.0.3';
 
 /// The dynamic library in which the symbols for vtzero can be found.
 final DynamicLibrary _dylib = () {
@@ -24,8 +28,11 @@ final DynamicLibrary _dylib = () {
     possiblePaths.add(
       '../../lib/native/$platform/$architecture/lib$_libName.dylib',
     );
-    // Try framework (for iOS/App bundles)
+    // Try framework (for iOS/App bundles).
+    // CocoaPods ships vtzero_dart.framework; SPM product name uses hyphens
+    // (vtzero-dart.framework) per Flutter's plugin packaging rules.
     possiblePaths.add('$_libName.framework/$_libName');
+    possiblePaths.add('vtzero-dart.framework/vtzero-dart');
     // Try dylib in build directory (for tests/development)
     possiblePaths.add('build/lib$_libName.dylib');
     possiblePaths.add('../build/lib$_libName.dylib');
@@ -59,7 +66,23 @@ final DynamicLibrary _dylib = () {
   // Try each path until one works
   for (final path in possiblePaths) {
     try {
-      return DynamicLibrary.open(path);
+      final lib = DynamicLibrary.open(path);
+      final packaging = path.contains('vtzero-dart.framework')
+          ? 'SPM'
+          : path.contains('vtzero_dart.framework')
+          ? 'CocoaPods'
+          : 'native-file';
+      // ignore: avoid_print
+      print(
+        '[vtzero_dart] Loaded v$_packageVersion via $packaging at "$path" '
+        '($platform/$architecture)',
+      );
+      developer.log(
+        'Loaded vtzero_dart $_packageVersion via $packaging at "$path" '
+        '($platform/$architecture)',
+        name: 'vtzero_dart',
+      );
+      return lib;
     } catch (e) {
       // Continue to next path
     }

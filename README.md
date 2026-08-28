@@ -350,6 +350,17 @@ This project includes the following third-party components:
 
 See [third_party/](third_party/) directory for complete license texts.
 
+## Apple platforms (CocoaPods + Swift Package Manager)
+
+iOS and macOS support **both** dependency managers:
+
+- **CocoaPods** — `ios/vtzero_dart.podspec` / `macos/vtzero_dart.podspec` (unchanged behavior)
+- **Swift Package Manager** — `ios/vtzero_dart/Package.swift` / `macos/vtzero_dart/Package.swift`
+
+Native sources live under `*/vtzero_dart/Sources/vtzero_dart/` so both toolchains compile the same ObjC++ forwarder into shared `src/vtzero_wrapper.cpp`. SPM cannot use header search paths outside the package root, so vtzero/protozero headers are vendored under `*/vtzero_dart/ThirdParty/` (same libraries as `third_party/`).
+
+The Dart FFI loader accepts both `vtzero_dart.framework` (CocoaPods) and `vtzero-dart.framework` (SPM product naming).
+
 ## Contributing
 
 Contributions are welcome! Please feel free to submit a Pull Request.
@@ -358,12 +369,14 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 
 ### iOS Build Issues
 
-If you encounter build errors on iOS:
+If you encounter build errors on iOS with CocoaPods:
 
 ```bash
 cd example/ios
 pod install
 ```
+
+With Swift Package Manager enabled (Flutter 3.44+), Flutter resolves this plugin via `Package.swift` instead of CocoaPods.
 
 ### Android Build Issues
 

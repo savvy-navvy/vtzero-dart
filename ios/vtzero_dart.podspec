@@ -13,12 +13,12 @@ A new Flutter FFI plugin project.
   s.license          = { :file => '../LICENSE' }
   s.author           = { 'Your Company' => 'email@example.com' }
 
-  # This will ensure the source files in Classes/ are included in the native
-  # builds of apps using this FFI plugin. Podspec does not support relative
-  # paths, so Classes contains a forwarder C++ file that relatively imports
-  # `../src/*` so that the C++ sources can be shared among all target platforms.
+  # Sources live under the SPM layout so CocoaPods and SwiftPM compile the
+  # same forwarder. The .mm file relatively includes `../src/*` so C++ can be
+  # shared across Android/iOS/macOS/desktop.
   s.source           = { :path => '.' }
-  s.source_files = 'Classes/**/*'
+  s.source_files = 'vtzero_dart/Sources/vtzero_dart/**/*.{h,m,mm,cpp,cc,c}'
+  s.public_header_files = 'vtzero_dart/Sources/vtzero_dart/include/**/*.h'
   s.dependency 'Flutter'
   s.platform = :ios, '13.0'
 
@@ -28,7 +28,7 @@ A new Flutter FFI plugin project.
     'EXCLUDED_ARCHS[sdk=iphonesimulator*]' => 'i386',
     'CLANG_CXX_LANGUAGE_STANDARD' => 'c++14',
     'CLANG_CXX_LIBRARY' => 'libc++',
-    'HEADER_SEARCH_PATHS' => '$(inherited) "${PODS_TARGET_SRCROOT}/../third_party/vtzero/include" "${PODS_TARGET_SRCROOT}/../third_party/protozero/include"',
+    'HEADER_SEARCH_PATHS' => '$(inherited) "${PODS_TARGET_SRCROOT}/../third_party/vtzero/include" "${PODS_TARGET_SRCROOT}/../third_party/protozero/include" "${PODS_TARGET_SRCROOT}/../src"',
     'WARNING_CFLAGS' => '$(inherited) -Wno-documentation -Wno-documentation-deprecated-sync'
   }
   s.swift_version = '5.0'
