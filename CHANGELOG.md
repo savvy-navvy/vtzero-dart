@@ -1,3 +1,9 @@
+## Unreleased
+
+* Polygon holes are returned clockwise. Outer rings stay counter-clockwise, so
+  the polygon's area is always on the left of an edge (GeoJSON right-hand
+  rule). Holes were previously returned counter-clockwise like outer rings.
+
 ## 1.0.3
 
 * Add Swift Package Manager support for iOS and macOS (keep CocoaPods).
