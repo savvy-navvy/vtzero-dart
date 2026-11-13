@@ -676,16 +676,19 @@ struct GeoJsonHandler {
         // sum += (next.x - current.x) * (next.y + current.y)
         // Counter-clockwise if sum < 0
         bool is_ccw = is_counter_clockwise(current_ring);
-        
-        // All rings must be counter-clockwise according to the validation library
-        // If the ring is not counter-clockwise, reverse it
-        bool should_reverse = !is_ccw;
+
+        // GeoJSON right-hand rule: outer rings counter-clockwise, holes
+        // clockwise, so the polygon's area is always on the left of an edge.
+        // Making holes counter-clockwise as well puts the area on their
+        // right, and a caller that reads "entering" or "leaving" from the
+        // edge direction then gets every hole crossing backwards.
+        bool should_reverse = is_outer ? !is_ccw : is_ccw;
 
         // Emit ring
         callback(user_data, 0, 0, 0); // BEGIN_RING
         
         if (should_reverse) {
-            // Reverse the ring to fix winding order
+            // Reverse the ring to get the wanted direction
             // For a closed ring [A, B, C, A], we want [A, C, B, A]
             // We need to reverse all points except keep the first point as both start and end
             if (is_closed && current_ring.size() > 1) {
